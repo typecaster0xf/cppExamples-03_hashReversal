@@ -4,7 +4,7 @@ http://www.zedwood.com/article/cpp-sha512-function
 
 #include <cstring>
 #include <fstream>
-#include "sha512.h"
+#include "zedwood/sha512.h"
  
 const unsigned long long SHA512::sha512_k[80] = //ULL = uint64
             {0x428a2f98d728ae22ULL, 0x7137449123ef65cdULL,
