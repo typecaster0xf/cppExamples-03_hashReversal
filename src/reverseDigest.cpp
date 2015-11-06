@@ -9,7 +9,7 @@ bool checkADigest(string& testedString,
 		const string digest,
 		const unsigned long iterationNumber);
 
-string convertToTestString(const unsigned long iterationNumber);
+string convertToTestString(unsigned long iterationNumber);
 
 //===============================================
 
@@ -30,13 +30,28 @@ bool checkADigest(string& testedString,
 		const string digest,
 		const unsigned long iterationNumber)
 {
-	return true;
-	//TODO
+	const string test = convertToTestString(iterationNumber);
+	
+	if(sha512(test) == digest)
+	{
+		testedString = test;
+		return true;
+	}else
+		return false;
 }
 
-string convertToTestString(const unsigned long iterationNumber)
+string convertToTestString(unsigned long iterationNumber)
 {
-	return "return";//TODO
+	string output;
+	output.reserve(10);
+	
+	while(iterationNumber > 0)
+	{
+		output += static_cast<char>(iterationNumber & 0x7f);
+		iterationNumber >> 7;
+	}
+	
+	return output;
 }
 
 //===============================================
