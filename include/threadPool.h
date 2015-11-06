@@ -1,6 +1,9 @@
 #pragma once
 
 #include <pthread.h>
+#include <queue>
+
+using std::queue;
 
 class ThreadPool
 {
@@ -15,9 +18,19 @@ public:
 	struct ThreadData
 	{
 		pthread_t       thread;
-		pthread_mutex_t dataAccess;
+		pthread_mutex_t queueMutex;
 		
-		bool threadIsAlive;
+		enum ThreadCommandType
+		{
+			TERMINATE
+		};
+		
+		struct ThreadCommand
+		{
+			ThreadCommandType commandType;
+		};
+		
+		queue<ThreadCommand> commandQueue;
 	};
 	
 protected:

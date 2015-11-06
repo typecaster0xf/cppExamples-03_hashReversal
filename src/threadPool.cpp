@@ -1,3 +1,4 @@
+#include <cassert>
 #include <unistd.h>
 #include "threadPool.h"
 
@@ -8,8 +9,6 @@ void* threadMain(void* dataStructPtr);
 void lockMutex  (pthread_mutex_t &mutex);
 void unlockMutex(pthread_mutex_t &mutex);
 
-bool isThreadAlive(ThreadPool::ThreadData* threadData);
-
 //===============================================
 
 ThreadPool::ThreadPool(const unsigned int numberOfThreads):
@@ -19,10 +18,8 @@ numberOfThreads(numberOfThreads)
 	
 	for(unsigned int j = 0; j < numberOfThreads; j++)
 	{
-		threads[j].threadIsAlive = true;
-		
 		const int mutexInitStatus =
-				pthread_mutex_init(&threads[j].dataAccess, NULL);
+				pthread_mutex_init(&threads[j].queueMutex, NULL);
 		if(mutexInitStatus > 0)
 			throw mutexInitStatus;
 		
@@ -38,9 +35,12 @@ ThreadPool::~ThreadPool()
 {
 	for(unsigned int j = 0; j < numberOfThreads; j++)
 	{
-		lockMutex(threads[j].dataAccess);
-		threads[j].threadIsAlive = false;
-		unlockMutex(threads[j].dataAccess);
+		lockMutex(threads[j].queueMutex);
+		threads[j].commandQueue.push(
+				ThreadPool::ThreadData::ThreadCommand(
+						ThreadPool::ThreadData::
+								ThreadCommandType::TERMINATE));
+		unlockMutex(threads[j].queueMutex);
 	}
 	
 	for(unsigned int j = 0; j < numberOfThreads; j++)
@@ -48,6 +48,11 @@ ThreadPool::~ThreadPool()
 		const int joinStatus = pthread_join(threads[j].thread, NULL);
 		if(joinStatus > 0)
 			throw joinStatus;
+		
+		const int mutexStatus = 
+				pthread_mutex_destroy(&threads[j].queueMutex);
+		if(mutexStatus > 0)
+			throw mutexStatus;
 	}
 	
 	delete [] threads;
@@ -60,10 +65,34 @@ void* threadMain(void* dataStructPtr)
 	ThreadPool::ThreadData *data =
 			reinterpret_cast<ThreadPool::ThreadData*>(dataStructPtr);
 	
-	while(isThreadAlive(data))
-		usleep(40);
+	bool commandQueueWasEmpty;
+	ThreadPool::ThreadData::ThreadCommand command;
 	
-	return NULL;
+	while(true)
+	{
+		/*Get the next command sent to this
+		thread.*/
+		lockMutex(data->queueMutex);
+		commandQueueWasEmpty = data->commandQueue.empty();
+		if(!commandQueueWasEmpty)
+		{
+			command = data.commandQueue.front();
+			data.commandQueue.pop();
+		}
+		unlockMutex(data->queueMutex);
+		
+		/*Process the command if there was one.*/
+		if(commandQueueWasEmpty)
+			usleep(40);
+		else
+			switch(command.commandType)
+			{
+			case TERMINATE:
+				return NULL;
+			default:
+				assert(false);
+			}
+	}
 }
 
 void lockMutex(pthread_mutex_t &mutex)
@@ -84,15 +113,6 @@ void unlockMutex(pthread_mutex_t &mutex)
 		throw mutexStatus;
 	
 	return;
-}
-
-bool isThreadAlive(ThreadPool::ThreadData* threadData)
-{
-	lockMutex(threadData->dataAccess);
-	bool isAlive = threadData->threadIsAlive;
-	unlockMutex(threadData->dataAccess);
-	
-	return isAlive;
 }
 
 //===============================================
