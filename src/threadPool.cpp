@@ -9,6 +9,20 @@ void* threadMain(void* dataStructPtr);
 void lockMutex  (pthread_mutex_t &mutex);
 void unlockMutex(pthread_mutex_t &mutex);
 
+void fillRunQueues(ThreadPool::ThreadData* threads,
+		const unsigned int numberOfThreads,
+		unsigned long &currentBlockNumber,
+		bool(*function)(string&, const unsigned long),
+		const unsigned long blockSize);
+
+ThreadPool::ThreadData::ThreadCommand makeRunCommand(
+		bool(*function)(string&, const unsigned long),
+		unsigned long blockSize, unsigned long blockNumber);
+
+bool getSolution(ThreadPool::ThreadData* threads,
+		const unsigned int numberOfThreads,
+		string& solution);
+
 //===============================================
 
 ThreadPool::ThreadPool(const unsigned int numberOfThreads):
@@ -50,7 +64,8 @@ ThreadPool::~ThreadPool()
 	
 	for(unsigned int j = 0; j < numberOfThreads; j++)
 	{
-		const int joinStatus = pthread_join(threads[j].thread, NULL);
+		const int joinStatus = pthread_join(
+				threads[j].thread, NULL);
 		if(joinStatus > 0)
 			throw joinStatus;
 		
@@ -67,8 +82,19 @@ string ThreadPool::findResult(
 		bool(*function)(string&, const unsigned long),
 		unsigned long blockSize)
 {
-	//TODO
-	return "string";
+	unsigned long currentBlockNumber = 0;
+	
+	string solutionString;
+	
+	do
+	{
+		fillRunQueues(threads, numberOfThreads,
+				currentBlockNumber, function, blockSize);
+		
+		usleep(100);
+	}while(!getSolution(threads, numberOfThreads, solutionString));
+	
+	return solutionString;
 }
 
 //===============================================
@@ -128,6 +154,61 @@ void unlockMutex(pthread_mutex_t &mutex)
 		throw mutexStatus;
 	
 	return;
+}
+
+void fillRunQueues(ThreadPool::ThreadData* threads,
+		const unsigned int numberOfThreads,
+		unsigned long &currentBlockNumber,
+		bool(*function)(string&, const unsigned long),
+		const unsigned long blockSize)
+{
+	for(unsigned int j = 0; j < numberOfThreads; j++)
+	{
+		lockMutex(threads[j].queueMutex);
+		
+		for(unsigned int k = commandQueue.size(); k < 3; k++)
+			commandQueue.push(makeRunCommand(
+					function, blockSize, currentBlockNumber++);
+		
+		unlockMutex(threads[j].queueMutex);
+	}
+	
+	return;
+}
+
+ThreadPool::ThreadData::ThreadCommand makeRunCommand(
+		bool(*function)(string&, const unsigned long),
+		unsigned long blockSize, unsigned long blockNumber)
+{
+	return ThreadPool::ThreadData::ThreadCommand
+	{
+		ThreadPool::ThreadData::ThreadCommandType
+				::RUN_FUNCTION_SEARCH_LOOP,
+		function,
+		blockSize * blockNumber,
+		blockSize
+	};
+}
+
+bool getSolution(ThreadPool::ThreadData* threads,
+		const unsigned int numberOfThreads,
+		string& solution)
+{
+	for(unsigned int j = 0; j < numberOfThreads; j++)
+	{
+		lockMutex(threads[j].returnMutex);
+		
+		if(threads[j].hasReturnData)
+		{
+			solution = threads[j].returnString;
+			unlockMutex(threads[j].returnMutex);
+			return true;
+		}
+		
+		unlockMutex(threads[j].returnMutex);
+	}
+	
+	return false;
 }
 
 //===============================================
