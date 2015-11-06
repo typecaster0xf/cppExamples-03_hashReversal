@@ -1,7 +1,6 @@
 #pragma once
 
 #include <pthread.h>
-#include <vector>
 
 class ThreadPool
 {
@@ -13,13 +12,16 @@ public:
 	template<R>
 	R process(bool(*function)(&R, const unsigned long));
 	
-protected:
-	
 	struct ThreadData
 	{
-		pthread_t thread;
-		bool      threadIsAlive;
+		pthread_t       thread;
+		pthread_mutex_t dataAccess;
+		
+		bool threadIsAlive;
 	};
 	
-	std::vector<ThreadData> threads;
+protected:
+	
+	const unsigned int numberOfThreads;
+	ThreadData         *threads;
 };
