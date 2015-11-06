@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <pthread.h>
 #include <queue>
 
@@ -12,8 +13,8 @@ public:
 	ThreadPool(const unsigned int numberOfThreads);
 	~ThreadPool();
 	
-	//template<typename R>
-	//R process(bool(*function)(&R, const unsigned long));
+	std::string findResult(bool (*function)(
+			std::string&, const unsigned long));
 	
 	struct ThreadData
 	{

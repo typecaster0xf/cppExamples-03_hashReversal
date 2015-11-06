@@ -60,6 +60,12 @@ ThreadPool::~ThreadPool()
 	delete [] threads;
 }
 
+string ThreadPool::findResult(
+		bool(*function)(string&, const unsigned long))
+{
+	return "string";
+}
+
 //===============================================
 
 void* threadMain(void* dataStructPtr)
