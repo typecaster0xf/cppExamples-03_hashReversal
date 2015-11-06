@@ -12,13 +12,17 @@ to run.*/
 void fillRunQueues(ThreadPool::ThreadData* threads,
 		const unsigned int numberOfThreads,
 		unsigned long &currentBlockNumber,
-		bool(*function)(string&, const unsigned long),
+		bool(*function)(string&, const string,
+				const unsigned long),
+		const string& consistendParam,
 		const unsigned long blockSize);
 
 /*Used by fillRunQueues() to generate a node to
 put on the command queue.*/
 ThreadPool::ThreadData::ThreadCommand makeRunCommand(
-		bool(*function)(string&, const unsigned long),
+		bool(*function)(string&, const string,
+				const unsigned long),
+		const string& consistentParam,
 		unsigned long blockSize, unsigned long blockNumber);
 
 /*Used by findResult() to check if a solution has
@@ -35,8 +39,9 @@ void* threadMain(void* dataStructPtr);
 /*Runs the block of function calls.  Returns true
 if a function call succeeded and will set the
 "result" parameter.*/
-bool runFunctionSearch(bool (*function)(
-				std::string&, const unsigned long),
+bool runFunctionSearch(bool (*function)(std::string&,
+				const string, const unsigned long),
+		const string *consistentParam,
 		const unsigned long start,
 		const unsigned long blockSize,
 		string& result);
@@ -78,10 +83,11 @@ numberOfThreads(numberOfThreads)
 
 ThreadPool::~ThreadPool()
 {
-	ThreadPool::ThreadData::ThreadCommand terminateCommand
+	ThreadData::ThreadCommand terminateCommand
 	{
-		ThreadPool::ThreadData::ThreadCommandType::TERMINATE,
+		ThreadData::ThreadCommandType::TERMINATE,
 		NULL,
+		NULL,//TODO Do I even need these?
 		0,
 		0
 	};
@@ -122,7 +128,9 @@ ThreadPool::~ThreadPool()
 }//ThreadPool::~ThreadPool()
 
 string ThreadPool::findResult(
-		bool(*function)(string&, const unsigned long),
+		bool(*function)(string&, const string,
+				const unsigned long),
+		const string functionArg,
 		unsigned long blockSize)
 {
 	unsigned long currentBlockNumber = 0;
@@ -132,7 +140,8 @@ string ThreadPool::findResult(
 	do
 	{
 		fillRunQueues(threads, numberOfThreads,
-				currentBlockNumber, function, blockSize);
+				currentBlockNumber, function,
+				functionArg, blockSize);
 		
 		usleep(100);
 	}while(!getSolution(threads, numberOfThreads, solutionString));
@@ -165,7 +174,9 @@ void unlockMutex(pthread_mutex_t &mutex)
 void fillRunQueues(ThreadPool::ThreadData* threads,
 		const unsigned int numberOfThreads,
 		unsigned long &currentBlockNumber,
-		bool(*function)(string&, const unsigned long),
+		bool(*function)(string&, const string,
+				const unsigned long),
+		const string& consistentParam,
 		const unsigned long blockSize)
 {
 	for(unsigned int j = 0; j < numberOfThreads; j++)
@@ -178,7 +189,8 @@ void fillRunQueues(ThreadPool::ThreadData* threads,
 		for(unsigned int k = threads[j].commandQueue.size();
 				k < 3; k++)
 			threads[j].commandQueue.push(makeRunCommand(
-					function, blockSize, currentBlockNumber++));
+					function, consistentParam,
+					blockSize, currentBlockNumber++));
 		
 		unlockMutex(threads[j].queueMutex);
 	}
@@ -187,14 +199,19 @@ void fillRunQueues(ThreadPool::ThreadData* threads,
 }
 
 ThreadPool::ThreadData::ThreadCommand makeRunCommand(
-		bool(*function)(string&, const unsigned long),
+		bool(*function)(string&, const string,
+				const unsigned long),
+		const string& consistentParam,
 		unsigned long blockSize, unsigned long blockNumber)
 {
 	return ThreadPool::ThreadData::ThreadCommand
 	{
 		ThreadPool::ThreadData::ThreadCommandType
 				::RUN_FUNCTION_SEARCH,
+		
 		function,
+		
+		&consistentParam,
 		blockSize * blockNumber,
 		blockSize
 	};
@@ -259,6 +276,7 @@ void* threadMain(void* dataStructPtr)
 			case ThreadPool::ThreadData::
 					ThreadCommandType::RUN_FUNCTION_SEARCH:
 				if(runFunctionSearch(command.function,
+						command.consistentParam,
 						command.startValue,
 						command.blockSize,
 						resultString))
@@ -279,14 +297,15 @@ void* threadMain(void* dataStructPtr)
 }//threadMain
 
 bool runFunctionSearch(bool (*function)(
-				string&, const unsigned long),
+				string&, const string, const unsigned long),
+		const string *consistentParam,
 		const unsigned long start,
 		const unsigned long blockSize,
 		string& result)
 {
 	for(unsigned long j = start, count = 0;
 			count < blockSize; j++, count++)
-		if(function(result, j))
+		if(function(result, *consistentParam, j))
 			return true;
 	
 	return false;
@@ -297,11 +316,10 @@ bool runFunctionSearch(bool (*function)(
 #ifdef UNITTEST
 #include <iostream>
 
-using namespace std;
-
 /*Example function to be passed to
 findResult().*/
-bool isNumber3000(string& returnString, const unsigned long number)
+bool isNumber3000(string& returnString, const string,
+		const unsigned long number)
 {
 	if(number == 3000)
 	{
@@ -315,7 +333,7 @@ int main()
 {
 	ThreadPool *threadPool = new ThreadPool(3);
 	
-	assert(threadPool->findResult(&isNumber3000)
+	assert(threadPool->findResult(&isNumber3000, "")
 			== "Number is 3000");
 	
 	delete threadPool;

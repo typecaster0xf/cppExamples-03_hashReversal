@@ -33,32 +33,32 @@ bin/reverseDigest.o: \
 		src/reverseDigest.cpp \
 		include/reverseDigest.h \
 		include/threadPool.h \
-		include/zedwood/sha512.h
+		include/zedwood/sha512.h | bin
 	$(OBJECT)
 bin/reverseDigest__opt.o: \
 		src/reverseDigest.cpp \
 		include/reverseDigest.h \
 		include/threadPool.h \
-		include/zedwood/sha512.h
+		include/zedwood/sha512.h | bin
 	$(OPTIMIZED)
 bin/reverseDigest__ut.o: \
 		src/reverseDigest.cpp \
 		include/reverseDigest.h \
 		include/threadPool.h \
-		include/zedwood/sha512.h
+		include/zedwood/sha512.h | bin
 	$(UNIT_TEST)
 
 bin/threadPool.o: \
 		src/threadPool.cpp \
-		include/threadPool.h
+		include/threadPool.h | bin
 	$(OBJECT)
 bin/threadPool__opt.o: \
 		src/threadPool.cpp \
-		include/threadPool.h
+		include/threadPool.h | bin
 	$(OPTIMIZED)
 bin/threadPool__ut.o: \
 		src/threadPool.cpp \
-		include/threadPool.h
+		include/threadPool.h | bin
 	$(UNIT_TEST)
 
 bin/zedwood-sha512.o: \

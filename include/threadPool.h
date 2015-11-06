@@ -54,9 +54,13 @@ public:
 		struct ThreadCommand
 		{
 			ThreadCommandType commandType;
-			bool (*function)(std::string&, const unsigned long);
-			unsigned long startValue;
-			unsigned long blockSize;
+			
+			bool (*function)(std::string&, const std::string,
+					const unsigned long);
+			
+			const std::string *consistentParam;
+			unsigned long     startValue;
+			unsigned long     blockSize;
 		};
 		
 		/*The worker threads receive instructions
