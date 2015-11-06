@@ -225,6 +225,7 @@ bool getSolution(ThreadPool::ThreadData* threads,
 		if(threads[j].hasReturnData)
 		{
 			solution = threads[j].returnString;
+			threads[j].hasReturnData = false;
 			unlockMutex(threads[j].returnMutex);
 			return true;
 		}
