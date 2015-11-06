@@ -4,8 +4,6 @@
 
 using namespace std;
 
-void* threadMain(void* dataStructPtr);
-
 void lockMutex  (pthread_mutex_t &mutex);
 void unlockMutex(pthread_mutex_t &mutex);
 
@@ -22,6 +20,10 @@ ThreadPool::ThreadData::ThreadCommand makeRunCommand(
 bool getSolution(ThreadPool::ThreadData* threads,
 		const unsigned int numberOfThreads,
 		string& solution);
+
+//======
+
+void* threadMain(void* dataStructPtr);
 
 //===============================================
 
@@ -123,43 +125,6 @@ string ThreadPool::findResult(
 
 //===============================================
 
-void* threadMain(void* dataStructPtr)
-{
-	ThreadPool::ThreadData *data =
-			reinterpret_cast<ThreadPool::ThreadData*>(dataStructPtr);
-	
-	bool commandQueueWasEmpty;
-	ThreadPool::ThreadData::ThreadCommand command;
-	
-	while(true)
-	{
-		/*Get the next command sent to this
-		thread.*/
-		lockMutex(data->queueMutex);
-		commandQueueWasEmpty = data->commandQueue.empty();
-		if(!commandQueueWasEmpty)
-		{
-			command = data->commandQueue.front();
-			data->commandQueue.pop();
-		}
-		unlockMutex(data->queueMutex);
-		
-		/*Process the command if there was one.*/
-		if(commandQueueWasEmpty)
-			usleep(40);
-		else
-			switch(command.commandType)
-			{
-			case ThreadPool::ThreadData::
-					ThreadCommandType::TERMINATE:
-				return NULL;
-			//TODO case run function
-			default:
-				assert(false);
-			}
-	}
-}
-
 void lockMutex(pthread_mutex_t &mutex)
 {
 	const int mutexStatus = pthread_mutex_lock(&mutex);
@@ -234,6 +199,45 @@ bool getSolution(ThreadPool::ThreadData* threads,
 	}
 	
 	return false;
+}
+
+//---------------------------
+
+void* threadMain(void* dataStructPtr)
+{
+	ThreadPool::ThreadData *data =
+			reinterpret_cast<ThreadPool::ThreadData*>(dataStructPtr);
+	
+	bool commandQueueWasEmpty;
+	ThreadPool::ThreadData::ThreadCommand command;
+	
+	while(true)
+	{
+		/*Get the next command sent to this
+		thread.*/
+		lockMutex(data->queueMutex);
+		commandQueueWasEmpty = data->commandQueue.empty();
+		if(!commandQueueWasEmpty)
+		{
+			command = data->commandQueue.front();
+			data->commandQueue.pop();
+		}
+		unlockMutex(data->queueMutex);
+		
+		/*Process the command if there was one.*/
+		if(commandQueueWasEmpty)
+			usleep(40);
+		else
+			switch(command.commandType)
+			{
+			case ThreadPool::ThreadData::
+					ThreadCommandType::TERMINATE:
+				return NULL;
+			//TODO case run function
+			default:
+				assert(false);
+			}
+	}
 }
 
 //===============================================
