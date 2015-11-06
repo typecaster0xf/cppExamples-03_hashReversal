@@ -15,10 +15,16 @@ public:
 	ThreadPool(const unsigned int numberOfThreads);
 	~ThreadPool();
 	
+	/*Returns the string set by "function" when
+	it eventually returns true.*/
 	std::string findResult(bool (*function)(
 					std::string&, const unsigned long),
 			unsigned long blockSize = 300);
 	
+	/*Used internally.  Only declaired in the
+	public section so that it is visible to the
+	worker threads, (which for some reason can't
+	seem to access friend functions).*/
 	struct ThreadData
 	{
 		pthread_t thread;
@@ -37,9 +43,13 @@ public:
 			unsigned long blockSize;
 		};
 		
+		/*The worker threads receive instructions
+		through this queue.*/
 		pthread_mutex_t           queueMutex;
 		std::queue<ThreadCommand> commandQueue;
 		
+		/*Data is returned using these
+		variables.*/
 		pthread_mutex_t returnMutex;
 		bool            hasReturnData;
 		std::string     returnString;
