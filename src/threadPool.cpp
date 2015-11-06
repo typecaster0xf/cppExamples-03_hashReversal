@@ -131,9 +131,24 @@ void unlockMutex(pthread_mutex_t &mutex)
 
 using namespace std;
 
+bool isNumber3000(string& returnString, const unsigned long number)
+{
+	if(number == 3000)
+	{
+		returnString = "Number is 3000";
+		return true;
+	}else
+		return false;
+}
+
 int main()
 {
-	ThreadPool threadPool(3);
+	ThreadPool *threadPool = new ThreadPool(3);
+	
+	assert(threadPool->findResult(&isNumber3000)
+			== "Number is 3000");
+	
+	delete threadPool;
 	
 	cout << "class ThreadPool unit test passed." << endl;
 	return 0;
