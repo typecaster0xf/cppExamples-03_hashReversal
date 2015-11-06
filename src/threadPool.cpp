@@ -32,16 +32,29 @@ numberOfThreads(numberOfThreads)
 	
 	for(unsigned int j = 0; j < numberOfThreads; j++)
 	{
-		const int mutexInitStatus =
-				pthread_mutex_init(&threads[j].queueMutex, NULL);
-		if(mutexInitStatus > 0)
-			throw mutexInitStatus;
+		{
+			const int mutexInitStatus =
+					pthread_mutex_init(&threads[j].queueMutex, NULL);
+			if(mutexInitStatus > 0)
+				throw mutexInitStatus;
+		}
 		
-		const int threadCreateStatus =
-				pthread_create(&threads[j].thread, NULL,
-						&threadMain, &threads[j]);
-		if(threadCreateStatus > 0)
-			throw threadCreateStatus;
+		{
+			const int mutexInitStatus =
+					pthread_mutex_init(&threads[j].returnMutex, NULL);
+			if(mutexInitStatus > 0)
+				throw mutexInitStatus;
+		}
+		
+		threads[j].hasReturnData = false;
+		
+		{
+			const int threadCreateStatus =
+					pthread_create(&threads[j].thread, NULL,
+							&threadMain, &threads[j]);
+			if(threadCreateStatus > 0)
+				throw threadCreateStatus;
+		}
 	}
 }
 
@@ -64,15 +77,26 @@ ThreadPool::~ThreadPool()
 	
 	for(unsigned int j = 0; j < numberOfThreads; j++)
 	{
-		const int joinStatus = pthread_join(
-				threads[j].thread, NULL);
-		if(joinStatus > 0)
-			throw joinStatus;
+		{
+			const int joinStatus = pthread_join(
+					threads[j].thread, NULL);
+			if(joinStatus > 0)
+				throw joinStatus;
+		}
 		
-		const int mutexStatus = 
-				pthread_mutex_destroy(&threads[j].queueMutex);
-		if(mutexStatus > 0)
-			throw mutexStatus;
+		{
+			const int mutexStatus = 
+					pthread_mutex_destroy(&threads[j].queueMutex);
+			if(mutexStatus > 0)
+				throw mutexStatus;
+		}
+		
+		{
+			const int mutexStatus = 
+					pthread_mutex_destroy(&threads[j].returnMutex);
+			if(mutexStatus > 0)
+				throw mutexStatus;
+		}
 	}
 	
 	delete [] threads;
