@@ -4,3 +4,5 @@ SHA-512 hash.
 This is the third in a series of exercises where
 I intend to produce a program each day using
 C++.
+
+Demo Video: https://youtu.be/YxSMHbHeL80
