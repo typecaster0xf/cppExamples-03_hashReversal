@@ -24,7 +24,7 @@ public:
 		enum ThreadCommandType
 		{
 			TERMINATE,
-			RUN_FUNCTION_SEARCH_LOOP
+			RUN_FUNCTION_SEARCH
 		};
 		
 		struct ThreadCommand

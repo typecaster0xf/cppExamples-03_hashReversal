@@ -25,6 +25,12 @@ bool getSolution(ThreadPool::ThreadData* threads,
 
 void* threadMain(void* dataStructPtr);
 
+bool runFunctionSearch(bool (*function)(
+				std::string&, const unsigned long),
+		const unsigned long start,
+		const unsigned long blockSize,
+		string& result);
+
 //===============================================
 
 ThreadPool::ThreadPool(const unsigned int numberOfThreads):
@@ -155,9 +161,10 @@ void fillRunQueues(ThreadPool::ThreadData* threads,
 	{
 		lockMutex(threads[j].queueMutex);
 		
-		for(unsigned int k = commandQueue.size(); k < 3; k++)
-			commandQueue.push(makeRunCommand(
-					function, blockSize, currentBlockNumber++);
+		for(unsigned int k = threads[j].commandQueue.size();
+				k < 3; k++)
+			threads[j].commandQueue.push(makeRunCommand(
+					function, blockSize, currentBlockNumber++));
 		
 		unlockMutex(threads[j].queueMutex);
 	}
@@ -172,7 +179,7 @@ ThreadPool::ThreadData::ThreadCommand makeRunCommand(
 	return ThreadPool::ThreadData::ThreadCommand
 	{
 		ThreadPool::ThreadData::ThreadCommandType
-				::RUN_FUNCTION_SEARCH_LOOP,
+				::RUN_FUNCTION_SEARCH,
 		function,
 		blockSize * blockNumber,
 		blockSize
@@ -211,6 +218,8 @@ void* threadMain(void* dataStructPtr)
 	bool commandQueueWasEmpty;
 	ThreadPool::ThreadData::ThreadCommand command;
 	
+	string resultString;
+	
 	while(true)
 	{
 		/*Get the next command sent to this
@@ -233,11 +242,40 @@ void* threadMain(void* dataStructPtr)
 			case ThreadPool::ThreadData::
 					ThreadCommandType::TERMINATE:
 				return NULL;
-			//TODO case run function
+			case ThreadPool::ThreadData::
+					ThreadCommandType::RUN_FUNCTION_SEARCH:
+				if(runFunctionSearch(command.function,
+						command.startValue,
+						command.blockSize,
+						resultString))
+				{
+					lockMutex(data->returnMutex);
+					
+					assert(data->hasReturnData == false);
+					data->hasReturnData = true;
+					data->returnString  = resultString;
+					
+					unlockMutex(data->returnMutex);
+				}
+				break;
 			default:
 				assert(false);
 			}
 	}
+}
+
+bool runFunctionSearch(bool (*function)(
+				std::string&, const unsigned long),
+		const unsigned long start,
+		const unsigned long blockSize,
+		string& result)
+{
+	for(unsigned long j = start, count = 0;
+			count < blockSize; j++, count++)
+		if(function(result, j))
+			return true;
+	
+	return false;
 }
 
 //===============================================
