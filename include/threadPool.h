@@ -14,24 +14,33 @@ public:
 	~ThreadPool();
 	
 	std::string findResult(bool (*function)(
-			std::string&, const unsigned long));
+					std::string&, const unsigned long),
+			unsigned long blockSize = 300);
 	
 	struct ThreadData
 	{
-		pthread_t       thread;
-		pthread_mutex_t queueMutex;
+		pthread_t thread;
 		
 		enum ThreadCommandType
 		{
-			TERMINATE
+			TERMINATE,
+			RUN_FUNCTION_SEARCH_LOOP
 		};
 		
 		struct ThreadCommand
 		{
 			ThreadCommandType commandType;
+			bool (*function)(std::string&, const unsigned long);
+			unsigned long startValue;
+			unsigned long blockSize;
 		};
 		
+		pthread_mutex_t      queueMutex;
 		queue<ThreadCommand> commandQueue;
+		
+		pthread_mutex_t returnMutex;
+		bool            hasReturnData;
+		std::string     returnString;
 	};
 	
 protected:

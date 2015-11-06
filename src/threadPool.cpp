@@ -35,7 +35,10 @@ ThreadPool::~ThreadPool()
 {
 	ThreadPool::ThreadData::ThreadCommand terminateCommand
 	{
-		ThreadPool::ThreadData::ThreadCommandType::TERMINATE
+		ThreadPool::ThreadData::ThreadCommandType::TERMINATE,
+		NULL,
+		0,
+		0
 	};
 	
 	for(unsigned int j = 0; j < numberOfThreads; j++)
@@ -61,8 +64,10 @@ ThreadPool::~ThreadPool()
 }
 
 string ThreadPool::findResult(
-		bool(*function)(string&, const unsigned long))
+		bool(*function)(string&, const unsigned long),
+		unsigned long blockSize)
 {
+	//TODO
 	return "string";
 }
 
@@ -98,6 +103,7 @@ void* threadMain(void* dataStructPtr)
 			case ThreadPool::ThreadData::
 					ThreadCommandType::TERMINATE:
 				return NULL;
+			//TODO case run function
 			default:
 				assert(false);
 			}
