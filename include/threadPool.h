@@ -4,6 +4,10 @@
 #include <pthread.h>
 #include <queue>
 
+/*This thread pool is specially designed for
+running a function that takes an integer and if
+it succeeds, sets a string value; and running
+that function many times until it succeeds.*/
 class ThreadPool
 {
 public:
