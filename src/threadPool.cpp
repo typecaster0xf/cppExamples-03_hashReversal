@@ -7,24 +7,34 @@ using namespace std;
 void lockMutex  (pthread_mutex_t &mutex);
 void unlockMutex(pthread_mutex_t &mutex);
 
+/*Ensures that each thread's queue has 3 blocks
+to run.*/
 void fillRunQueues(ThreadPool::ThreadData* threads,
 		const unsigned int numberOfThreads,
 		unsigned long &currentBlockNumber,
 		bool(*function)(string&, const unsigned long),
 		const unsigned long blockSize);
 
+/*Used by fillRunQueues() to generate a node to
+put on the command queue.*/
 ThreadPool::ThreadData::ThreadCommand makeRunCommand(
 		bool(*function)(string&, const unsigned long),
 		unsigned long blockSize, unsigned long blockNumber);
 
+/*Used by findResult() to check if a solution has
+been found.  If it has, this function will return
+true and the "solution" string will be set.*/
 bool getSolution(ThreadPool::ThreadData* threads,
 		const unsigned int numberOfThreads,
 		string& solution);
 
-//======
+//===Worker Thread Functions===
 
 void* threadMain(void* dataStructPtr);
 
+/*Runs the block of function calls.  Returns true
+if a function call succeeded and will set the
+"result" parameter.*/
 bool runFunctionSearch(bool (*function)(
 				std::string&, const unsigned long),
 		const unsigned long start,
@@ -76,6 +86,7 @@ ThreadPool::~ThreadPool()
 		0
 	};
 	
+	/*Send each thread the terminate command.*/
 	for(unsigned int j = 0; j < numberOfThreads; j++)
 	{
 		lockMutex(threads[j].queueMutex);
@@ -108,7 +119,7 @@ ThreadPool::~ThreadPool()
 	}
 	
 	delete [] threads;
-}
+}//ThreadPool::~ThreadPool()
 
 string ThreadPool::findResult(
 		bool(*function)(string&, const unsigned long),
@@ -161,6 +172,9 @@ void fillRunQueues(ThreadPool::ThreadData* threads,
 	{
 		lockMutex(threads[j].queueMutex);
 		
+		/*This only adds to the queue if it had
+		less than three nodes pushed to begin
+		with.*/
 		for(unsigned int k = threads[j].commandQueue.size();
 				k < 3; k++)
 			threads[j].commandQueue.push(makeRunCommand(
@@ -262,7 +276,7 @@ void* threadMain(void* dataStructPtr)
 				assert(false);
 			}
 	}
-}
+}//threadMain
 
 bool runFunctionSearch(bool (*function)(
 				string&, const unsigned long),
@@ -285,6 +299,8 @@ bool runFunctionSearch(bool (*function)(
 
 using namespace std;
 
+/*Example function to be passed to
+findResult().*/
 bool isNumber3000(string& returnString, const unsigned long number)
 {
 	if(number == 3000)
