@@ -10,5 +10,9 @@ string reverseDigest(const string sha512Checksum,
 {
 	assert(sha512Checksum.size() == 128);
 	
+	ThreadPool threadPool(threads);
+	
+	//return threadPool.findResult(//TODO
+	
 	return "return";
 }
