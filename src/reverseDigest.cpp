@@ -16,3 +16,19 @@ string reverseDigest(const string sha512Checksum,
 	
 	return "return";
 }
+
+//===============================================
+
+#ifdef UNITTEST
+#include <iostream>
+
+int main()
+{
+	const string input = "R4";
+	
+	assert(reverseDigest(sha512(input)) == input);
+	
+	cout << "reverseDigest(string) unit test passed." << endl;
+	return 0;
+}
+#endif
