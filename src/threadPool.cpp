@@ -1,6 +1,7 @@
 #include <unistd.h>
 #include "threadPool.h"
 
+#include <iostream>
 using namespace std;
 
 void* threadMain(void* dataStructPtr);
@@ -17,8 +18,10 @@ numberOfThreads(numberOfThreads)
 {
 	threads = new ThreadData[numberOfThreads];
 	
+cout << "Create" << endl;
 	for(unsigned int j = 0; j < numberOfThreads; j++)
 	{
+cout << "j:" << j << endl;
 		threads[j].threadIsAlive = true;
 		
 		const int mutexInitStatus =
@@ -32,12 +35,15 @@ numberOfThreads(numberOfThreads)
 		if(threadCreateStatus > 0)
 			throw threadCreateStatus;
 	}
+cout << "Done." << endl;
 }
 
 ThreadPool::~ThreadPool()
 {
+cout << "Destroy" << endl;
 	for(unsigned int j = 0; j < numberOfThreads; j++)
 	{
+cout << "j1:" << j << endl;
 		lockMutex(threads[j].dataAccess);
 		threads[j].threadIsAlive = false;
 		unlockMutex(threads[j].dataAccess);
@@ -45,23 +51,26 @@ ThreadPool::~ThreadPool()
 	
 	for(unsigned int j = 0; j < numberOfThreads; j++)
 	{
+cout << "j2:" << j << endl;
 		const int joinStatus = pthread_join(threads[j].thread, NULL);
 		if(joinStatus > 0)
 			throw joinStatus;
 	}
 	
 	delete [] threads;
+cout << "Done." << endl;
 }
 
 //===============================================
 
 void* threadMain(void* dataStructPtr)
 {
+cout << "Thread started." << endl;
 	ThreadPool::ThreadData *data =
 			reinterpret_cast<ThreadPool::ThreadData*>(dataStructPtr);
 	
 	while(isThreadAlive(data))
-		sleep(40);
+		usleep(40);
 	
 	return NULL;
 }
