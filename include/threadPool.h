@@ -9,8 +9,8 @@ public:
 	ThreadPool(const unsigned int numberOfThreads);
 	~ThreadPool();
 	
-	template<R>
-	R process(bool(*function)(&R, const unsigned long));
+	//template<typename R>
+	//R process(bool(*function)(&R, const unsigned long));
 	
 	struct ThreadData
 	{

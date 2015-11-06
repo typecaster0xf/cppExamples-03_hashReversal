@@ -30,7 +30,7 @@ numberOfThreads(numberOfThreads)
 				pthread_create(&threads[j].thread, NULL,
 						&threadMain, &threads[j]);
 		if(threadCreateStatus > 0)
-			throw createStatus;
+			throw threadCreateStatus;
 	}
 }
 
@@ -57,8 +57,8 @@ ThreadPool::~ThreadPool()
 
 void* threadMain(void* dataStructPtr)
 {
-	ControlStruct *data =
-			reinterpret_cast<ThreadData*>(dataStructPtr);
+	ThreadPool::ThreadData *data =
+			reinterpret_cast<ThreadPool::ThreadData*>(dataStructPtr);
 	
 	while(isThreadAlive(data))
 		sleep(40);
