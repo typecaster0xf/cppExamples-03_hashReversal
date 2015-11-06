@@ -10,7 +10,20 @@ UNIT_TEST=$(CC) $< -c -std=c++11 -I include -D UNITTEST -o $@
 
 LINK=$(CC) $^ -lpthread -o $@
 
-#################################################
+####################
+#  Release Binary  ##############################
+####################
+
+hashReversal.exe: \
+		bin/main__opt.o \
+		bin/reverseDigest__opt.o \
+		bin/threadPool__opt.o \
+		bin/zedwood-sha512__opt.o
+	$(LINK)
+
+################
+#  Unit Tests  ##################################
+################
 
 unittestReverseDigest.exe: \
 		bin/reverseDigest__ut.o \
@@ -27,7 +40,20 @@ unittestThreadPool.exe: \
 		bin/threadPool__ut.o
 	$(LINK)
 
-#################################################
+##################
+#  Object Files  ################################
+##################
+
+bin/main.o: \
+		src/main.cpp \
+		include/reverseDigest.h \
+		include/zedwood/sha512.h | bin
+	$(OBJECT)
+bin/main__opt.o: \
+		src/main.cpp \
+		include/reverseDigest.h \
+		include/zedwood/sha512.h | bin
+	$(OPTIMIZED)
 
 bin/reverseDigest.o: \
 		src/reverseDigest.cpp \
@@ -75,7 +101,9 @@ bin/zedwood-unittestMain.o: \
 		include/zedwood/sha512.h | bin
 	$(OBJECT)
 
-#################################################
+###########
+#  Other  #######################################
+###########
 
 bin:
 	mkdir bin
