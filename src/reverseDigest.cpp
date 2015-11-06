@@ -5,8 +5,10 @@
 
 using namespace std;
 
-string reverseDigest(const string sha256Checksum,
+string reverseDigest(const string sha512Checksum,
 		const unsigned int threads)
 {
+	assert(sha512Checksum.size() == 128);
+	
 	return "return";
 }
