@@ -265,7 +265,7 @@ void* threadMain(void* dataStructPtr)
 }
 
 bool runFunctionSearch(bool (*function)(
-				std::string&, const unsigned long),
+				string&, const unsigned long),
 		const unsigned long start,
 		const unsigned long blockSize,
 		string& result)
