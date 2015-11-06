@@ -1,9 +1,13 @@
 CC=g++
 
 .SECONDEXPANSION:
-OBJECT=$(CC) $< -c -I include -o $@
-OPTIMIZED=$(CC) $< -c -I include -O2 -march=native -D NDEBUG -o $@
-UNIT_TEST=$(CC) $< -c -I include -D UNITTEST -o $@
+OBJECT=$(CC) $< -c -std=c++11 -I include -o $@
+
+OPTIMIZED=$(CC) $< -c -std=c++11 -I include -O2 \
+-march=native -D NDEBUG -o $@
+
+UNIT_TEST=$(CC) $< -c -std=c++11 -I include -D UNITTEST -o $@
+
 LINK=$(CC) $^ -lpthread -o $@
 
 #################################################

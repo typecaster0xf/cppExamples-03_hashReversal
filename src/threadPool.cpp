@@ -33,13 +33,15 @@ numberOfThreads(numberOfThreads)
 
 ThreadPool::~ThreadPool()
 {
+	ThreadPool::ThreadData::ThreadCommand terminateCommand
+	{
+		ThreadPool::ThreadData::ThreadCommandType::TERMINATE
+	};
+	
 	for(unsigned int j = 0; j < numberOfThreads; j++)
 	{
 		lockMutex(threads[j].queueMutex);
-		threads[j].commandQueue.push(
-				ThreadPool::ThreadData::ThreadCommand(
-						ThreadPool::ThreadData::
-								ThreadCommandType::TERMINATE));
+		threads[j].commandQueue.push(terminateCommand);
 		unlockMutex(threads[j].queueMutex);
 	}
 	
@@ -76,8 +78,8 @@ void* threadMain(void* dataStructPtr)
 		commandQueueWasEmpty = data->commandQueue.empty();
 		if(!commandQueueWasEmpty)
 		{
-			command = data.commandQueue.front();
-			data.commandQueue.pop();
+			command = data->commandQueue.front();
+			data->commandQueue.pop();
 		}
 		unlockMutex(data->queueMutex);
 		
@@ -87,7 +89,8 @@ void* threadMain(void* dataStructPtr)
 		else
 			switch(command.commandType)
 			{
-			case TERMINATE:
+			case ThreadPool::ThreadData::
+					ThreadCommandType::TERMINATE:
 				return NULL;
 			default:
 				assert(false);
@@ -118,10 +121,15 @@ void unlockMutex(pthread_mutex_t &mutex)
 //===============================================
 
 #ifdef UNITTEST
+#include <iostream>
+
+using namespace std;
+
 int main()
 {
 	ThreadPool threadPool(3);
 	
+	cout << "class ThreadPool unit test passed." << endl;
 	return 0;
 }
 #endif
