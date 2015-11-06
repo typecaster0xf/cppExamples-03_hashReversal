@@ -12,6 +12,12 @@ LINK=$(CC) $^ -lpthread -o $@
 
 #################################################
 
+unittestReverseDigest.exe: \
+		bin/reverseDigest__ut.o \
+		bin/threadPool.o \
+		bin/zedwood-sha512.o
+	$(LINK)
+
 unittestSHA512.exe: \
 		bin/zedwood-unittestMain.o \
 		bin/zedwood-sha512.o
@@ -22,6 +28,25 @@ unittestThreadPool.exe: \
 	$(LINK)
 
 #################################################
+
+bin/reverseDigest.o: \
+		src/reverseDigest.cpp \
+		include/reverseDigest.h \
+		include/threadPool.h \
+		include/zedwood/sha512.h
+	$(OBJECT)
+bin/reverseDigest__opt.o: \
+		src/reverseDigest.cpp \
+		include/reverseDigest.h \
+		include/threadPool.h \
+		include/zedwood/sha512.h
+	$(OPTIMIZED)
+bin/reverseDigest__ut.o: \
+		src/reverseDigest.cpp \
+		include/reverseDigest.h \
+		include/threadPool.h \
+		include/zedwood/sha512.h
+	$(UNIT_TEST)
 
 bin/threadPool.o: \
 		src/threadPool.cpp \

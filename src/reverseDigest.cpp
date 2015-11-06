@@ -26,7 +26,7 @@ int main()
 {
 	const string input = "R4";
 	
-	assert(reverseDigest(sha512(input)) == input);
+	assert(reverseDigest(sha512(input), 4) == input);
 	
 	cout << "reverseDigest(string) unit test passed." << endl;
 	return 0;
