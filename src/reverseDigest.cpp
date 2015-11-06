@@ -5,6 +5,14 @@
 
 using namespace std;
 
+bool checkADigest(string& testedString,
+		const string digest,
+		const unsigned long iterationNumber);
+
+string convertToTestString(const unsigned long iterationNumber);
+
+//===============================================
+
 string reverseDigest(const string sha512Checksum,
 		const unsigned int threads)
 {
@@ -12,9 +20,23 @@ string reverseDigest(const string sha512Checksum,
 	
 	ThreadPool threadPool(threads);
 	
-	//return threadPool.findResult(//TODO
-	
-	return "return";
+	return threadPool.findResult(&checkADigest,
+			sha512Checksum);
+}
+
+//===============================================
+
+bool checkADigest(string& testedString,
+		const string digest,
+		const unsigned long iterationNumber)
+{
+	return true;
+	//TODO
+}
+
+string convertToTestString(const unsigned long iterationNumber)
+{
+	return "return";//TODO
 }
 
 //===============================================
