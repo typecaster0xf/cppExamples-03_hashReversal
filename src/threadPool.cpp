@@ -86,10 +86,6 @@ ThreadPool::~ThreadPool()
 	ThreadData::ThreadCommand terminateCommand
 	{
 		ThreadData::ThreadCommandType::TERMINATE,
-		NULL,
-		NULL,//TODO Do I even need these?
-		0,
-		0
 	};
 	
 	/*Send each thread the terminate command.*/
