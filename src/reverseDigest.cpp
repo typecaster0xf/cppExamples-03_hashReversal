@@ -3,9 +3,6 @@
 #include "threadPool.h"
 #include "zedwood/sha512.h"
 
-#include <iostream>
-#include <unistd.h>
-
 using namespace std;
 
 bool checkADigest(string& testedString,
@@ -33,7 +30,6 @@ bool checkADigest(string& testedString,
 		const string digest,
 		const unsigned long iterationNumber)
 {
-cout << "Entering checkADigest()" << endl;
 	const string test = convertToTestString(iterationNumber);
 	
 	if(sha512(test) == digest)
@@ -51,14 +47,10 @@ string convertToTestString(unsigned long iterationNumber)
 	
 	while(iterationNumber > 0)
 	{
-cout << iterationNumber << endl;
-usleep(500);
 		output += static_cast<char>(iterationNumber & 0x7f);
 		iterationNumber >>= 7;
 	}
 	
-cout << "convertedString: \"" << output << '\"' << endl;
-usleep(500);
 	return output;
 }
 
@@ -71,7 +63,7 @@ int main()
 {
 	const string input = "R4";
 	
-	assert(reverseDigest(sha512(input), 1) == input);
+	assert(reverseDigest(sha512(input), 4) == input);
 	
 	cout << "reverseDigest(string) unit test passed." << endl;
 	return 0;

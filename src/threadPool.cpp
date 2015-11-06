@@ -2,8 +2,6 @@
 #include <unistd.h>
 #include "threadPool.h"
 
-#include <iostream>
-
 using namespace std;
 
 void lockMutex  (pthread_mutex_t &mutex);
@@ -273,7 +271,6 @@ void* threadMain(void* dataStructPtr)
 				return NULL;
 			case ThreadPool::ThreadData::
 					ThreadCommandType::RUN_FUNCTION_SEARCH:
-cout << "Running function search" << endl;
 				if(runFunctionSearch(command.function,
 						command.consistentParam,
 						command.startValue,
@@ -288,7 +285,6 @@ cout << "Running function search" << endl;
 					
 					unlockMutex(data->returnMutex);
 				}
-cout << "Finished function search" << endl;
 				break;
 			default:
 				assert(false);
@@ -305,12 +301,8 @@ bool runFunctionSearch(bool (*function)(
 {
 	for(unsigned long j = start, count = 0;
 			count < blockSize; j++, count++)
-{
-printf("Silo entre  j: %lu  func: %p\n", j, function);
 		if(function(result, *consistentParam, j))
 			return true;
-cout << "Silo fertig" << endl;
-}
 	
 	return false;
 }
