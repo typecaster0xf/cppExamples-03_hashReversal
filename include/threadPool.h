@@ -4,8 +4,6 @@
 #include <pthread.h>
 #include <queue>
 
-using std::queue;
-
 class ThreadPool
 {
 public:
@@ -35,8 +33,8 @@ public:
 			unsigned long blockSize;
 		};
 		
-		pthread_mutex_t      queueMutex;
-		queue<ThreadCommand> commandQueue;
+		pthread_mutex_t           queueMutex;
+		std::queue<ThreadCommand> commandQueue;
 		
 		pthread_mutex_t returnMutex;
 		bool            hasReturnData;
