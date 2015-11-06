@@ -94,3 +94,14 @@ bool isThreadAlive(ThreadPool::ThreadData* threadData)
 	
 	return isAlive;
 }
+
+//===============================================
+
+#ifdef UNITTEST
+int main()
+{
+	ThreadPool threadPool(3);
+	
+	return 0;
+}
+#endif

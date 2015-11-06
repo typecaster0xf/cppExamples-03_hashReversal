@@ -13,7 +13,24 @@ unittestSHA512.exe: \
 		bin/zedwood-sha512.o
 	$(LINK)
 
+unittestThreadPool.exe: \
+		bin/threadPool__ut.o
+	$(LINK)
+
 #################################################
+
+bin/threadPool.o: \
+		src/threadPool.cpp \
+		include/threadPool.h
+	$(OBJECT)
+bin/threadPool__opt.o: \
+		src/threadPool.cpp \
+		include/threadPool.h
+	$(OPTIMIZED)
+bin/threadPool__ut.o: \
+		src/threadPool.cpp \
+		include/threadPool.h
+	$(UNIT_TEST)
 
 bin/zedwood-sha512.o: \
 		zedwood/sha512.cpp \
